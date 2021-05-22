@@ -1,5 +1,5 @@
 {
-    "name": "Unity.com.{{COMPANY}}.{{REPOSITORY_NAME}}.Editor",
+    "name": "Unity.com.common-games.Tools.CutomizableMenus.Editor",
     "references": [],
     "includePlatforms": [
         "Editor"
