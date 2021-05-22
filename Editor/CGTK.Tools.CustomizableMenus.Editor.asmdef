@@ -1,7 +1,10 @@
 {
-    "name": "Unity.com.common-games.Tools.CutomizableMenus",
+    "name": "CGTK.Tools.CustomizableMenus.Editor",
+    "rootNamespace": "CGTK.Tools.CustomizableMenus",
     "references": [],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,
