@@ -37,9 +37,9 @@ namespace CGTK.Tools.CustomizableMenus
             return new SerializedObject(obj: GetOrCreateSettings());
         }
     }
-    
+
     // Register a SettingsProvider using UIElements for the drawing framework:
-    static class SettingsRegister
+    static class SettingsRegistry
     {
         [SettingsProvider]
         public static SettingsProvider CreateMyCustomSettingsProvider()
