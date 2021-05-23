@@ -1,7 +1,11 @@
 using System;
-using Sirenix.OdinInspector;
+
 using UnityEditor;
 using UnityEngine;
+
+#if ODIN_INSPECTOR
+using Sirenix.OdinInspector;
+#endif
 
 namespace CGTK.Tools.CustomizableMenus
 {
@@ -16,20 +20,25 @@ namespace CGTK.Tools.CustomizableMenus
         
         #region Fields
 
+        #if ODIN_INSPECTOR
         [TableColumnWidth(width: 30)]
-        //[LabelText("Type")]
+        #endif
         public ElementType type = ElementType.Separator;
         
         /// <summary> Original Path. </summary>
+        #if ODIN_INSPECTOR
         [ShowIf(nameof(type), ElementType.Path)]
         [TableColumnWidth(width: 60, resizable: true)]
-        [OnValueChanged(nameof(SetDefaultCustomOnOriginalChange))]
         [ValueDropdown(valuesGetter: nameof(MenuOptions))]
+        [OnValueChanged(nameof(SetDefaultCustomOnOriginalChange))]
+        #endif
         public string original;
         
         /// <summary> Customized Path. </summary>
+        #if ODIN_INSPECTOR
         [ShowIf(nameof(type), ElementType.Path)]
         [TableColumnWidth(width: 60, resizable: true)]
+        #endif
         public string custom;
 
         protected abstract string MenuPath { get; }
