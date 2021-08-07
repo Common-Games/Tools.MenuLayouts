@@ -1,6 +1,5 @@
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -8,7 +7,6 @@ using UnityEngine.UIElements;
 
 namespace CGTK.Tools.CustomizableMenus
 {
-    // Create a new type of Settings Asset.
     internal sealed class Settings : ScriptableObject
     {
         public const string SETTINGS_PATH = Constants.EDITOR_FOLDER_PATH + "MyCustomSettings.asset";
@@ -34,19 +32,19 @@ namespace CGTK.Tools.CustomizableMenus
         
         internal static SerializedObject GetSerializedSettings()
         {
-            return new SerializedObject(obj: GetOrCreateSettings());
+            return new(obj: GetOrCreateSettings());
         }
     }
 
-    // Register a SettingsProvider using UIElements for the drawing framework:
-    static class SettingsRegistry
+    [InitializeOnLoad]
+    internal static class SettingsRegistry
     {
         [SettingsProvider]
         public static SettingsProvider CreateMyCustomSettingsProvider()
         {
             // First parameter is the path in the Settings window.
             // Second parameter is the scope of this setting: it only appears in the Settings window for the Project scope.
-            SettingsProvider __provider = new SettingsProvider(path: "Preferences/CGTK/Tools/Customizable Menus", SettingsScope.User)
+            SettingsProvider __provider = new(path: "Preferences/CGTK/Tools/Custom MenuLayouts", scopes: SettingsScope.User)
             {
                 label = "Customizable Menus",
                 
@@ -59,8 +57,14 @@ namespace CGTK.Tools.CustomizableMenus
                     // isn't called because the SettingsProvider uses the UIElements drawing framework.
                     StyleSheet __styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(Constants.STYLE_SHEET_PATH);
                     rootElement.styleSheets.Add(__styleSheet);
+
+                    #region Title
+
                     
-                    Label __title = new Label
+
+                    #endregion
+                    
+                    Label __title = new()
                     {
                         text = "Customizable Menus"
                     };
@@ -68,29 +72,58 @@ namespace CGTK.Tools.CustomizableMenus
                     __title.AddToClassList(className: "title");
                     rootElement.Add(__title);
 
-                    VisualElement __properties = new VisualElement
+                    VisualElement __visualElement = new()
                     {
                         style =
                         {
                             flexDirection = FlexDirection.Column
                         }
                     };
-                    __properties.AddToClassList(className: "property-list");
-                    rootElement.Add(__properties);
 
-                    IntegerField __integerField = new IntegerField
+                    #region HierarchyLayout
+
+                    #region Label
+
+                    //Label uxmlLabel = __visualElement.Q<Label>("the-uxml-label");
+                    //__visualElement.Add(uxmlLabel);
+                    
+                    Label __label = new("C# Label");
+                    __label.AddToClassList("some-styled-label");
+                    __visualElement.Add(__label);
+
+                    #endregion
+                    
+
+                    #endregion
+
+                    __visualElement.AddToClassList(className: "property-list");
+                    rootElement.Add(__visualElement);
+
+                    IntegerField __integerField = new()
                     {
                         value = __settings.FindProperty(propertyPath: nameof(Settings.m_Number)).intValue
                     };
                     __integerField.AddToClassList(className: "property-value");
-                    __properties.Add(__integerField);
+                    __visualElement.Add(__integerField);
                     
-                    TextField __tf = new TextField
+                    TextField __tf = new()
                     {
                         value = __settings.FindProperty(propertyPath: nameof(Settings.m_SomeString)).stringValue
                     };
                     __tf.AddToClassList(className: "property-value");
-                    __properties.Add(__tf);
+                    __visualElement.Add(__tf);
+
+                    void __Action()
+                    {
+                        __visualElement.Query<Button>().ForEach(button =>
+                        {
+                            button.text = button.text.EndsWith(value: "Button") ? "Button (Clicked)" : "Button";
+                        });
+                    }
+
+                    Button __newHierarchyLayoutButton = new(__Action) { text = "New" };
+                    __newHierarchyLayoutButton.AddToClassList(className: "some-styled-button");
+                    __visualElement.Add(__newHierarchyLayoutButton);
                 },
 
                 // Populate the search keywords to enable smart search filtering and label highlighting:
@@ -99,5 +132,6 @@ namespace CGTK.Tools.CustomizableMenus
 
             return __provider;
         }
+        
     }
 }
