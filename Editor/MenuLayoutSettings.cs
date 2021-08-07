@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 using UnityEditor;
@@ -7,27 +8,27 @@ using UnityEngine.UIElements;
 
 namespace CGTK.Tools.CustomizableMenus
 {
-    internal sealed class Settings : ScriptableObject
+    internal sealed class MenuLayoutSettings : ScriptableObject
     {
-        public const string SETTINGS_PATH = Constants.EDITOR_FOLDER_PATH + "MyCustomSettings.asset";
+        private const String _SETTINGS_PATH = Constants.EDITOR_FOLDER_PATH + nameof(MenuLayoutSettings) + ".asset";
 
         [SerializeField]
-        internal int m_Number;
+        internal Int32 m_Number;
 
         [SerializeField]
-        internal string m_SomeString;
+        internal String m_SomeString;
 
-        internal static Settings GetOrCreateSettings()
+        internal static MenuLayoutSettings GetOrCreateSettings()
         {
-            Settings __settings = AssetDatabase.LoadAssetAtPath<Settings>(SETTINGS_PATH);
-            if (__settings != null) return __settings;
+            MenuLayoutSettings __menuLayoutSettings = AssetDatabase.LoadAssetAtPath<MenuLayoutSettings>(_SETTINGS_PATH);
+            if (__menuLayoutSettings != null) return __menuLayoutSettings;
             
-            __settings = CreateInstance<Settings>();
-            __settings.m_Number = 42;
-            __settings.m_SomeString = "The answer to the universe";
-            AssetDatabase.CreateAsset(__settings, SETTINGS_PATH);
+            __menuLayoutSettings = CreateInstance<MenuLayoutSettings>();
+            __menuLayoutSettings.m_Number = 42;
+            __menuLayoutSettings.m_SomeString = "The answer to the universe";
+            AssetDatabase.CreateAsset(__menuLayoutSettings, _SETTINGS_PATH);
             AssetDatabase.SaveAssets();
-            return __settings;
+            return __menuLayoutSettings;
         }
         
         internal static SerializedObject GetSerializedSettings()
@@ -44,14 +45,14 @@ namespace CGTK.Tools.CustomizableMenus
         {
             // First parameter is the path in the Settings window.
             // Second parameter is the scope of this setting: it only appears in the Settings window for the Project scope.
-            SettingsProvider __provider = new(path: "Preferences/CGTK/Tools/Custom MenuLayouts", scopes: SettingsScope.User)
+            SettingsProvider __provider = new(path: "Preferences/CGTK/Tools/Custom Menu Layouts", scopes: SettingsScope.User)
             {
-                label = "Customizable Menus",
+                label = "Custom Menu Layouts",
                 
                 // activateHandler is called when the user clicks on the Settings item in the Settings window.
                 activateHandler = (searchContext, rootElement) =>
                 {
-                    SerializedObject __settings = Settings.GetSerializedSettings();
+                    SerializedObject __settings = MenuLayoutSettings.GetSerializedSettings();
 
                     // rootElement is a VisualElement. If you add any children to it, the OnGUI function
                     // isn't called because the SettingsProvider uses the UIElements drawing framework.
@@ -66,7 +67,7 @@ namespace CGTK.Tools.CustomizableMenus
                     
                     Label __title = new()
                     {
-                        text = "Customizable Menus"
+                        text = "Custom Menu Layouts"
                     };
                     
                     __title.AddToClassList(className: "title");
@@ -101,14 +102,14 @@ namespace CGTK.Tools.CustomizableMenus
 
                     IntegerField __integerField = new()
                     {
-                        value = __settings.FindProperty(propertyPath: nameof(Settings.m_Number)).intValue
+                        value = __settings.FindProperty(propertyPath: nameof(MenuLayoutSettings.m_Number)).intValue
                     };
                     __integerField.AddToClassList(className: "property-value");
                     __visualElement.Add(__integerField);
                     
                     TextField __tf = new()
                     {
-                        value = __settings.FindProperty(propertyPath: nameof(Settings.m_SomeString)).stringValue
+                        value = __settings.FindProperty(propertyPath: nameof(MenuLayoutSettings.m_SomeString)).stringValue
                     };
                     __tf.AddToClassList(className: "property-value");
                     __visualElement.Add(__tf);
@@ -127,7 +128,7 @@ namespace CGTK.Tools.CustomizableMenus
                 },
 
                 // Populate the search keywords to enable smart search filtering and label highlighting:
-                keywords = new HashSet<string>(collection: new[] { "Number", "Some String" })
+                keywords = new HashSet<String>(collection: new[] { "Number", "Some String" })
             };
 
             return __provider;
