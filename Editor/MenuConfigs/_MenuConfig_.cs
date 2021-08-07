@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 using UnityEditor;
@@ -6,18 +7,23 @@ using UnityEngine;
 
 using JetBrains.Annotations;
 using Sirenix.OdinInspector;
+using Object = System.Object;
 
 namespace CGTK.Tools.CustomizableMenus
 {
-    public abstract class MenuConfig<Item_T> : ScriptableObject
-        where Item_T : MenuItem 
+    using I32 = Int32;
+
+    public abstract class MenuConfig<T_Item> : ScriptableObject, IEnumerator, IEnumerable
+        where T_Item : MenuItem 
     {
         #region Fields
         
+        #if ODIN_INSPECTOR
         [TableList]
-        public List<Item_T> items = new List<Item_T>();
+        #endif
+        public List<T_Item> items = new List<T_Item>();
 
-        private const String _SETTINGS_PATH = Constants.EDITOR_FOLDER_PATH + "MyCustomSettings.asset";
+        //private const String _SETTINGS_PATH = Constants.EDITOR_FOLDER_PATH + "MyCustomSettings.asset";
         
         /// <summary> Name of the Config file (without .asset extension) </summary>
         protected abstract String ConfigName { get; }
@@ -25,23 +31,28 @@ namespace CGTK.Tools.CustomizableMenus
 
         #endregion
 
-        #region Methods
+        #region Indexer
 
-        public Item_T this[Int32 index]
+        [PublicAPI]
+        public T_Item this[I32 index]
         {
             get => items[index];
             set => items[index] = value;
         }
+        
+        #endregion
+
+        #region Methods
 
         [PublicAPI]
-        public MenuConfig<Item_T> GetOrCreateConfig
+        public MenuConfig<T_Item> GetOrCreateConfig
         {
             get
             {
-                MenuConfig<Item_T>  __config = AssetDatabase.LoadAssetAtPath<MenuConfig<Item_T>>(assetPath: ConfigLocation);
+                MenuConfig<T_Item>  __config = AssetDatabase.LoadAssetAtPath<MenuConfig<T_Item>>(assetPath: ConfigLocation);
                 if (__config != null) return __config;
             
-                __config = CreateInstance<MenuConfig<Item_T>>();
+                __config = CreateInstance<MenuConfig<T_Item>>();
 
                 AssetDatabase.CreateAsset(asset: __config, path: ConfigLocation);
                 AssetDatabase.SaveAssets();
@@ -54,6 +65,23 @@ namespace CGTK.Tools.CustomizableMenus
         {
             return new SerializedObject(obj: GetOrCreateConfig);
         }
+
+        #endregion
+
+        #region IEnumerator/IEnumerable Impl
+
+        public I32 Length => items.Count; 
+
+        public I32 CurrentIndex { get; private set; }= -1;
+        public Boolean MoveNext() => ((CurrentIndex += 1) < items.Count);
+        public   Object Current  => items[index: CurrentIndex];
+        internal T_Item Previous => items[index: CurrentIndex - 1];
+        internal T_Item Next     => items[index: CurrentIndex + 1];
+        //Conflicts with Unity's Reset function, but that shouldn't matter too much. If it does I'll find out soon enough.
+        //If it does I could make the Enumerator a nested class.
+        public void Reset() => CurrentIndex = 0;
+
+        public IEnumerator GetEnumerator() => this;
 
         #endregion
     }
