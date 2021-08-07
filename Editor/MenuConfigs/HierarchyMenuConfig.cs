@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace CGTK.Tools.CustomizableMenus
@@ -6,6 +7,6 @@ namespace CGTK.Tools.CustomizableMenus
     [CreateAssetMenu]
     public sealed class HierarchyMenuConfig : MenuConfig<HierarchyMenuItem>
     {
-        protected override string ConfigName => nameof(HierarchyMenuConfig);
+        protected override String ConfigName => nameof(HierarchyMenuConfig);
     }
 }

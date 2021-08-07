@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 
 using UnityEditor;
@@ -16,15 +17,21 @@ namespace CGTK.Tools.CustomizableMenus
         [TableList]
         public List<Item_T> items = new List<Item_T>();
 
-        private const string _SETTINGS_PATH = Constants.EDITOR_FOLDER_PATH + "MyCustomSettings.asset";
+        private const String _SETTINGS_PATH = Constants.EDITOR_FOLDER_PATH + "MyCustomSettings.asset";
         
         /// <summary> Name of the Config file (without .asset extension) </summary>
-        protected abstract string ConfigName { get; }
-        protected string ConfigLocation => Constants.EDITOR_FOLDER_PATH + ConfigName + ".asset";
+        protected abstract String ConfigName { get; }
+        protected String ConfigLocation => Constants.EDITOR_FOLDER_PATH + ConfigName + ".asset";
 
         #endregion
 
         #region Methods
+
+        public Item_T this[Int32 index]
+        {
+            get => items[index];
+            set => items[index] = value;
+        }
 
         [PublicAPI]
         public MenuConfig<Item_T> GetOrCreateConfig

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 namespace CGTK.Tools.CustomizableMenus
@@ -6,6 +7,6 @@ namespace CGTK.Tools.CustomizableMenus
     [CreateAssetMenu]
     public sealed class ProjectMenuConfig : MenuConfig<ProjectMenuItem>
     {
-        protected override string ConfigName => nameof(ProjectMenuConfig);
+        protected override String ConfigName => nameof(ProjectMenuConfig);
     }
 }
