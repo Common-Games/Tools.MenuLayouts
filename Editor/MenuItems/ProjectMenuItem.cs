@@ -5,6 +5,6 @@ namespace CGTK.Tools.CustomizableMenus
     [Serializable]
     public sealed class ProjectMenuItem : MenuItem
     {
-        protected override string MenuPath => "Assets";
+        protected override String MenuPath => "Assets";
     }
 }

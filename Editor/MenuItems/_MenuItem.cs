@@ -1,5 +1,5 @@
 using System;
-
+using CGTK.Utilities.Extensions;
 using UnityEditor;
 using UnityEngine;
 
@@ -23,29 +23,31 @@ namespace CGTK.Tools.CustomizableMenus
         #if ODIN_INSPECTOR
         [TableColumnWidth(width: 30)]
         #endif
-        public ElementType type = ElementType.Separator;
+        public ElementType itemType = ElementType.Separator;
         
         /// <summary> Original Path. </summary>
         #if ODIN_INSPECTOR
-        [ShowIf(nameof(type), ElementType.Path)]
+        [ShowIf(condition: nameof(itemType), ElementType.Path)]
         [TableColumnWidth(width: 60, resizable: true)]
         [ValueDropdown(valuesGetter: nameof(MenuOptions))]
         [OnValueChanged(nameof(SetDefaultCustomOnOriginalChange))]
         #endif
-        public string original;
+        [field: SerializeField]
+        public String Original { get; private set; }
         
         /// <summary> Customized Path. </summary>
         #if ODIN_INSPECTOR
-        [ShowIf(nameof(type), ElementType.Path)]
+        [ShowIf(condition: nameof(itemType), ElementType.Path)]
         [TableColumnWidth(width: 60, resizable: true)]
         #endif
-        public string custom;
+        [field: SerializeField]
+        public String Custom { get; private set; }
 
-        protected abstract string MenuPath { get; }
+        protected abstract String MenuPath { get; }
         
         /// <summary> Gets a tree-view of all the submenus of "<see cref="MenuPath"/>". </summary>
         /// <returns> A tree-view of all the submenus of "<see cref="MenuPath"/>". </returns>
-        private string[] MenuOptions => Unsupported.GetSubmenus(menuPath: MenuPath);
+        private String[] MenuOptions => Unsupported.GetSubmenus(menuPath: MenuPath);
 
         #endregion
 
@@ -53,8 +55,8 @@ namespace CGTK.Tools.CustomizableMenus
 
         private void SetDefaultCustomOnOriginalChange()
         {
-            if (!string.IsNullOrEmpty(custom)) return;
-            custom = original;
+            if (Custom.NotNullOrEmpty()) return;
+            Custom = Original;
         }
 
         #endregion
