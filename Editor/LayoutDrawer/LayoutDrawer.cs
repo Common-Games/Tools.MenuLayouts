@@ -7,128 +7,62 @@ using CGTK.Utilities.Extensions;
 namespace CGTK.Tools.CustomizableMenus
 {
 	using static MenuItem.ElementType;
-
-	//TODO: Separate Hierarchy / Project Layout Drawer?
+	
+	using I32 = Int32;
 	
 	[InitializeOnLoad]
 	internal static partial class LayoutDrawer
 	{
-		#region Fields
-
-		//public static readonly bool UseCustomHierarchyMenu = true;
-		public static readonly HierarchyMenuConfig CustomHierarchyMenuLayout = null;
-		/// <summary>Menu for Hierarchy view.</summary>
-		private static GenericMenu _hierarchyMenuDropdown;
-
-		//public static readonly bool UseCustomProjectMenu = true;
-		public static readonly ProjectMenuConfig CustomProjectMenuLayout = null;
-		/// <summary>Menu for Project view.</summary>
-		private static GenericMenu _projectMenuDropdown; // = new();
-		
-		#endregion
-
-		#region Structors
-		
 		static LayoutDrawer()
 		{
-			SetupProjectMenu();
-			SetupHierarchyMenu();
+			Debug.Log(message: "Started Layout Drawer!");
 			
 			EditorApplication.projectWindowItemOnGUI   += OnProjectGUI;
 			EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyGUI;
 		}
 
-		#endregion
-
-		#region Methods
-		
-		private static void SetupHierarchyMenu()
-		{
-			if (CustomHierarchyMenuLayout == null) return;
-
-			CreateGenericMenu(layout: CustomHierarchyMenuLayout, menu: out _hierarchyMenuDropdown);
-		}
-		
-		private static void SetupProjectMenu()
-		{
-			if (CustomProjectMenuLayout == null) return;
-
-			CreateGenericMenu(layout: CustomProjectMenuLayout, menu: out _projectMenuDropdown);
-		}
-
-		private static void OnHierarchyGUI(Int32 instanceID, Rect selectionRect)
-		{
-			if(CustomProjectMenuLayout == null || _hierarchyMenuDropdown == null) return;
-			
-			Event __currentEvent = Event.current;
-			
-			if(__currentEvent.type == EventType.ContextClick)
-			{
-				_hierarchyMenuDropdown.ShowAsContext();
-				__currentEvent.Use();	
-			}
-		}
-
-		private static void OnProjectGUI(String guid, Rect selectionRect)
-		{
-			if(CustomProjectMenuLayout == null || _projectMenuDropdown == null) return;
-			
-			Event __currentEvent = Event.current;
-			
-			if(__currentEvent.type == EventType.ContextClick)
-			{
-				_projectMenuDropdown.ShowAsContext();
-				__currentEvent.Use();	
-			}
-		}
-		
 		/// <summary> Creates a menu tree from MenuLayout list. </summary>
-		private static void CreateGenericMenu<T>(in MenuConfig<T> layout, out GenericMenu menu)
+		/// <remarks> It also dictates the rules of how to draw it, what do with double separators, grouping, that sort of thing. </remarks>
+		private static void CreateGenericMenu<T>(in MenuLayout<T> layout, out GenericMenu menu)
 			where T : MenuItem
         {
-			if (layout == null)
-			{
-				menu = null;
-				return;
-			}
-			
+			if (layout == null) throw new ArgumentException(message: nameof(layout)); //TODO: Return null instead?
+
 			menu = new GenericMenu();
-			//if(layout == null) return;
-			
-            Int32 __itemCount = layout.items.Count;
-			
-			T __prevItem = null;
 
-			for(Int32 __index = 0; __index < __itemCount; ++__index) //TODO: ++
+			//foreach (T __item in layout)
+			for(I32 __index = 0; __index < layout.Length; __index++)
 			{
-				T __currentItem = layout[__index];
+				//I32 __index = layout.CurrentIndex;
+				
+				T __prev = layout[__index - 1];
+				T __curr = layout[__index];
+				T __next = layout[__index + 1];
 
-				switch(__currentItem.itemType)
+				switch(__curr.Type)
 				{
-					//case MenuItem.ElementType.None:
-					case Separator when (__prevItem == null): // If there is no previous item, skip.
-					case Separator when (__prevItem.Custom.IsNullOrEmpty()): // If previous item is null or empty, skip.
-					case Separator when (__index == 0 || __index == __itemCount-1): // If the item is first or last, skip.
+					case Separator when (__next == null || __next.Custom.IsNullOrEmpty()): // If there is no next item, skip.
+					case Separator when (__prev == null || __prev.Custom.IsNullOrEmpty()): // If previous item is null or empty, skip.
 						continue;
-					
+
 					case Separator:
 					{
-						T __nextItem = layout[index: __index+1];
-
 						// Double separators are skipped.
-						if(__nextItem.itemType == Separator) continue;
-
-						(String __matchingPart, _, _) = __prevItem.Original.SplitAtDeviation(__nextItem.Custom);
-
+						if(__next.Type == Separator) continue;
+						
+						(String __matchingPart, _, _) = __prev.Original.SplitAtDeviation(__next.Custom);
+						
 						if(__matchingPart == null) continue;
 
-						if(__matchingPart != "")
+						Boolean __isSubGroup = (__matchingPart != String.Empty);
+						
+						if(__isSubGroup)
 						{
-							Int32 __lastIndexOfSlash = __matchingPart.LastIndexOf('/');
+							I32 __lastIndexOfSlash = __matchingPart.LastIndexOf('/');
 
 							if(__lastIndexOfSlash != -1)
 							{
-								__matchingPart = __matchingPart.Substring(startIndex: 0, length: __lastIndexOfSlash + 1);
+								__matchingPart = __matchingPart[..(__lastIndexOfSlash + 1)];
 							}
 						}
 						
@@ -139,21 +73,18 @@ namespace CGTK.Tools.CustomizableMenus
 					case Path:
 					{
 						menu.AddItem(
-							content: new GUIContent(__currentItem.Custom), 
+							content: new GUIContent(__curr.Custom), 
 							on: false, 
 							func: (command => EditorApplication.ExecuteMenuItem(menuItemPath: command as String)), 
-							userData: __currentItem.Original);
+							userData: __curr.Original);
 
-						__prevItem = __currentItem;
+						//__prevItem = __item;
 						break;
 					}
 					default:
-						throw new System.ArgumentOutOfRangeException();
+						throw new ArgumentOutOfRangeException();
 				}
 			}
 		}
-				
-		#endregion
-	
 	}
 }
