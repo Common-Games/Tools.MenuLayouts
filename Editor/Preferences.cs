@@ -18,7 +18,9 @@ namespace CGTK.Tools.CustomizableMenus
     [Serializable]
     internal static class Preferences
     {
+        [field: SerializeField]
         public static MenuLayoutHierarchy CustomHierarchyMenuLayout { get; internal set; }
+        [field: SerializeField]
         public static MenuLayoutProject   CustomProjectMenuLayout   { get; internal set; }
     }
     
@@ -45,8 +47,9 @@ namespace CGTK.Tools.CustomizableMenus
                 EditorGUILayout.BeginHorizontal();
                 {
                     #if ODIN_INSPECTOR
+                    GUILayout.Label(text: "HierarchyMenu Layout", options: GUILayout.Width(145));
+
                     Preferences.CustomHierarchyMenuLayout = SirenixEditorFields.UnityObjectField(
-                        label: "HierarchyMenu Layout", 
                         value: Preferences.CustomHierarchyMenuLayout,
                         objectType: typeof(MenuLayoutHierarchy), 
                         allowSceneObjects: false) as MenuLayoutHierarchy;
@@ -78,8 +81,9 @@ namespace CGTK.Tools.CustomizableMenus
                 EditorGUILayout.BeginHorizontal();
                 {
                     #if ODIN_INSPECTOR
+                    GUILayout.Label(text: "ProjectMenu Layout", options: GUILayout.Width(145));
+                    
                     Preferences.CustomProjectMenuLayout = SirenixEditorFields.UnityObjectField(
-                        label: "ProjectMenu Layout", 
                         value: Preferences.CustomProjectMenuLayout,
                         objectType: typeof(MenuLayoutProject), 
                         allowSceneObjects: false) as MenuLayoutProject;
@@ -107,9 +111,11 @@ namespace CGTK.Tools.CustomizableMenus
             }
         }
 
+        public static SettingsProvider Settings { get; private set; }
+        
         [SettingsProvider]
         public static SettingsProvider Create() 
-            => new MenuLayoutsSettingsProvider(path: PackageConstants.PREFERENCE_PATH, scopes: SettingsScope.User);
+            => Settings = new MenuLayoutsSettingsProvider(path: PackageConstants.PREFERENCE_PATH, scopes: SettingsScope.User);
     }
 }
 //#endif
