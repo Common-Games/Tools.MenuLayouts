@@ -21,24 +21,25 @@ namespace CGTK.Tools.CustomizableMenus
         #region Fields
 
         #if ODIN_INSPECTOR
-        [TableColumnWidth(width: 30)]
+        [TableColumnWidth(30)]
         #endif
-        public ElementType itemType = ElementType.Separator;
+        [field: SerializeField]
+        public ElementType Type { get; private set; } = ElementType.Separator;
         
         /// <summary> Original Path. </summary>
         #if ODIN_INSPECTOR
-        [ShowIf(condition: nameof(itemType), ElementType.Path)]
-        [TableColumnWidth(width: 60, resizable: true)]
-        [ValueDropdown(valuesGetter: nameof(MenuOptions))]
-        [OnValueChanged(nameof(SetDefaultCustomOnOriginalChange))]
+        [field: ShowIf(condition: nameof(Type), ElementType.Path)]
+        [field: TableColumnWidth(60, resizable: true)]
+        [field: ValueDropdown(valuesGetter: nameof(MenuOptions))]
+        [field: OnValueChanged(action: nameof(SetDefaultCustomOnOriginalChange))]
         #endif
         [field: SerializeField]
         public String Original { get; private set; }
         
         /// <summary> Customized Path. </summary>
         #if ODIN_INSPECTOR
-        [ShowIf(condition: nameof(itemType), ElementType.Path)]
-        [TableColumnWidth(width: 60, resizable: true)]
+        [field: ShowIf(condition: nameof(Type), ElementType.Path)]
+        [field: TableColumnWidth(60, resizable: true)]
         #endif
         [field: SerializeField]
         public String Custom { get; private set; }
@@ -47,7 +48,7 @@ namespace CGTK.Tools.CustomizableMenus
         
         /// <summary> Gets a tree-view of all the submenus of "<see cref="MenuPath"/>". </summary>
         /// <returns> A tree-view of all the submenus of "<see cref="MenuPath"/>". </returns>
-        private String[] MenuOptions => Unsupported.GetSubmenus(menuPath: MenuPath);
+        private String[] MenuOptions => Unsupported.GetSubmenus(MenuPath);
 
         #endregion
 
