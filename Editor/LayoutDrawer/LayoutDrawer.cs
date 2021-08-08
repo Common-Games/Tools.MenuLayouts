@@ -2,8 +2,6 @@ using System;
 using UnityEditor;
 using UnityEngine;
 
-using CGTK.Utilities.Extensions;
-
 namespace CGTK.Tools.CustomizableMenus
 {
 	using static MenuItem.ElementType;
@@ -29,60 +27,55 @@ namespace CGTK.Tools.CustomizableMenus
 			if (layout == null) throw new ArgumentException(message: nameof(layout)); //TODO: Return null instead?
 
 			menu = new GenericMenu();
-
-			//foreach (T __item in layout)
-			for(I32 __index = 0; __index < layout.Length; __index++)
+			
+			for (I32 __index = 0; __index < layout.Length; __index++) //TODO: Make MenuLayout IEnumerable
 			{
-				//I32 __index = layout.CurrentIndex;
-				
-				T __prev = layout[__index - 1];
-				T __curr = layout[__index];
-				T __next = layout[__index + 1];
+				MenuLayout<T>.Element __element = layout[__index];
 
-				switch(__curr.Type)
+				if (__element.IsGroup)
 				{
-					case Separator when (__next == null || __next.Custom.IsNullOrEmpty()): // If there is no next item, skip.
-					case Separator when (__prev == null || __prev.Custom.IsNullOrEmpty()): // If previous item is null or empty, skip.
-						continue;
-
-					case Separator:
+					__Create(menu: menu, element: __element, group: __element.GroupName);	
+				}
+				else
+				{
+					if (__element.ElementType == Separator)
 					{
-						// Double separators are skipped.
-						if(__next.Type == Separator) continue;
-						
-						(String __matchingPart, _, _) = __prev.Original.SplitAtDeviation(__next.Custom);
-						
-						if(__matchingPart == null) continue;
-
-						Boolean __isSubGroup = (__matchingPart != String.Empty);
-						
-						if(__isSubGroup)
-						{
-							I32 __lastIndexOfSlash = __matchingPart.LastIndexOf('/');
-
-							if(__lastIndexOfSlash != -1)
-							{
-								__matchingPart = __matchingPart[..(__lastIndexOfSlash + 1)];
-							}
-						}
-						
-						menu.AddSeparator(path: __matchingPart);
-					
-						break;
+						menu.AddSeparator(path: String.Empty);
 					}
-					case Path:
+					else
 					{
 						menu.AddItem(
-							content: new GUIContent(__curr.Custom), 
+							content: new GUIContent(__element.CustomPath), 
 							on: false, 
 							func: (command => EditorApplication.ExecuteMenuItem(menuItemPath: command as String)), 
-							userData: __curr.Original);
-
-						//__prevItem = __item;
-						break;
+							userData: __element.OriginalPath);
 					}
-					default:
-						throw new ArgumentOutOfRangeException();
+				}
+			}
+
+			static void __Create(GenericMenu menu, MenuLayout<T>.Element element, String group)
+			{
+				foreach (MenuLayout<T>.Element __element in element.Group)
+				{
+					if (__element.IsGroup)
+					{
+						__Create(menu, __element, group +  "/" + __element.GroupName);
+					}
+					else
+					{
+						if (__element.ElementType == Separator)
+						{
+							menu.AddSeparator(path: group + "/");
+						}
+						else
+						{
+							menu.AddItem(
+								content: new GUIContent(text: group + "/" + __element.CustomPath), 
+								@on: false, 
+								func: (command => EditorApplication.ExecuteMenuItem(menuItemPath: command as String)), 
+								userData: __element.OriginalPath);
+						}
+					}
 				}
 			}
 		}
