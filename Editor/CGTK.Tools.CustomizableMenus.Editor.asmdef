@@ -2,7 +2,8 @@
     "name": "CGTK.Tools.CustomizableMenus.Editor",
     "rootNamespace": "CGTK.Tools.CustomizableMenus",
     "references": [
-        "CGTK.Utilities.Extensions.Runtime"
+        "CGTK.Utilities.Extensions.Runtime",
+        "CGTK.Utilities.Shared.Editor"
     ],
     "includePlatforms": [
         "Editor"
