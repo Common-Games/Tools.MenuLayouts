@@ -6,51 +6,108 @@ using UnityEditor;
 using UnityEngine;
 
 using JetBrains.Annotations;
+
+#if ODIN_INSPECTOR
 using Sirenix.OdinInspector;
+using Sirenix.Utilities.Editor;
+#endif
+
 using Object = System.Object;
 
 namespace CGTK.Tools.CustomizableMenus
 {
     using I32 = Int32;
 
-    public abstract class MenuLayout<T_Item> : ScriptableObject, IEnumerator, IEnumerable
+    public abstract class MenuLayout<T_Item> : ScriptableObject
         where T_Item : MenuItem 
     {
         #region Fields
         
-        #if ODIN_INSPECTOR
-        [TableList(DrawScrollView = true, MinScrollViewHeight = 100, MaxScrollViewHeight = 1000)]
-        #endif
-        public List<T_Item> items = new List<T_Item>();
-
-        #endregion
-
-        #region Indexer
-
-        [PublicAPI]
-        public T_Item this[I32 index]
-        {
-            get => ((index >= 0) && (index <= Length - 1)) ? items[index] : null;
-            set => items[index] = value;
-        }
+		#if ODIN_INSPECTOR
+        [ListDrawerSettings(ShowItemCount = false, OnTitleBarGUI = nameof(DrawAddFolderButton))]
+		#endif
+        [SerializeField] private List<Element> tree = new List<Element>();
         
+        [Serializable]
+        public class Element
+        {
+        	#region Fields
+
+        	public Boolean IsGroup { get; set; } = false;
+
+        	private Boolean _showName = true;
+
+        	private Boolean ShowGroupName => (IsGroup && _showName); 
+        	
+        	#if ODIN_INSPECTOR
+        	[field: ShowIf(condition: nameof(ShowGroupName)), BoxGroup]
+        	[field: HideLabel]
+        	[field: CustomContextMenu(menuItem: "Hide GroupName", action: nameof(HideName))]
+        	#endif
+			[field: SerializeField]
+        	public String GroupName { get; private set; }
+
+        	#if ODIN_INSPECTOR
+        	[field: ShowIf(condition: nameof(IsGroup)), BoxGroup]
+        	[field: CustomContextMenu(menuItem: "Show GroupName", action: nameof(ShowName))]
+        	[field: CustomContextMenu(menuItem: "Hide GroupName", action: nameof(HideName))]
+        	[field: ListDrawerSettings(ShowItemCount = false, OnTitleBarGUI = nameof(DrawAddFolderButtonElement))]
+        	[field: LabelText(text: "$" + nameof(GroupName))]
+        	#endif
+        	[field: SerializeField]
+        	public List<Element> Group { get; private set; } = null;
+        	
+        	#if ODIN_INSPECTOR
+        	[field: HideLabel]
+        	[field: HideIf(condition: nameof(IsGroup))]
+        	#endif
+        	[field: SerializeField]
+        	public T_Item Item { get; private set; } = null;
+        	
+        	#endregion
+
+        	#region Structors
+
+        	public Element(Boolean isGroup)
+        	{
+        		this.IsGroup = isGroup;
+
+        		if (isGroup)
+        		{
+        			Group = new List<Element>(capacity: 10);
+        		}
+        	}
+
+        	#endregion
+
+        	#region Methods
+        	
+        	#if ODIN_INSPECTOR
+        	private void DrawAddFolderButtonElement()
+        	{
+        		if (SirenixEditorGUI.ToolbarButton(EditorIcons.Folder))
+        		{
+        			Group.Add(item: new Element(isGroup: true));
+        		}
+        	}
+        	
+        	private void ShowName() => _showName = true;
+        	private void HideName() => _showName = false;
+        	#endif
+
+        	#endregion
+        }
+		
+		#if ODIN_INSPECTOR
+		private void DrawAddFolderButton()
+		{
+			if (SirenixEditorGUI.ToolbarButton(EditorIcons.Folder))
+			{
+				tree.Add(item: new Element(isGroup: true));
+			}
+		}
+		#endif
+
         #endregion
-
-        #region Methods
-
-        public I32 Length => items.Count; 
-
-        public I32 CurrentIndex { get; private set; }= -1;
-        public Boolean MoveNext() => ((CurrentIndex += 1) < items.Count);
-        public   Object Current  => items[index: CurrentIndex];
-        internal T_Item Previous => items[index: CurrentIndex - 1];
-        internal T_Item Next     => items[index: CurrentIndex + 1];
-        //Conflicts with Unity's Reset function, but that shouldn't matter too much. If it does I'll find out soon enough.
-        //If it does I could make the Enumerator a nested class.
-        public void Reset() => CurrentIndex = 0;
-
-        public IEnumerator GetEnumerator() => this;
-
-        #endregion
-    }
+	}
 }

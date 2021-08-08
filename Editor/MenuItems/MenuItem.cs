@@ -1,5 +1,6 @@
 using System;
-using CGTK.Utilities.Extensions;
+using System.Linq;
+
 using UnityEditor;
 using UnityEngine;
 
@@ -7,29 +8,28 @@ using UnityEngine;
 using Sirenix.OdinInspector;
 #endif
 
+using CGTK.Utilities.Extensions;
+
 namespace CGTK.Tools.CustomizableMenus
 {
     [Serializable]
     public abstract partial class MenuItem
     {
-        public enum ElementType
-        {
-            Separator,
-            Path,
-        }
-        
         #region Fields
-
+			
+        public enum ElementType { Separator, Path }
+			
         #if ODIN_INSPECTOR
-        [TableColumnWidth(30)]
+        [field: HorizontalGroup, HideLabel]
+        [field: LabelWidth(15)]
         #endif
         [field: SerializeField]
         public ElementType Type { get; private set; } = ElementType.Separator;
-        
+
         /// <summary> Original Path. </summary>
         #if ODIN_INSPECTOR
         [field: ShowIf(condition: nameof(Type), ElementType.Path)]
-        [field: TableColumnWidth(60, resizable: true)]
+        [field: HorizontalGroup, HideLabel]
         [field: ValueDropdown(valuesGetter: nameof(MenuOptions))]
         [field: OnValueChanged(action: nameof(SetDefaultCustomOnOriginalChange))]
         #endif
@@ -39,25 +39,25 @@ namespace CGTK.Tools.CustomizableMenus
         /// <summary> Customized Path. </summary>
         #if ODIN_INSPECTOR
         [field: ShowIf(condition: nameof(Type), ElementType.Path)]
-        [field: TableColumnWidth(60, resizable: true)]
+        [field: HorizontalGroup, HideLabel]
         #endif
         [field: SerializeField]
         public String Custom { get; private set; }
 
+        #endregion
+
+        #region Methods
+			
         protected abstract String MenuPath { get; }
         
         /// <summary> Gets a tree-view of all the submenus of "<see cref="MenuPath"/>". </summary>
         /// <returns> A tree-view of all the submenus of "<see cref="MenuPath"/>". </returns>
-        private String[] MenuOptions => Unsupported.GetSubmenus(MenuPath);
-
-        #endregion
-
-        #region Methods
+        private String[] MenuOptions => Unsupported.GetSubmenus(menuPath: MenuPath);
 
         private void SetDefaultCustomOnOriginalChange()
         {
             if (Custom.NotNullOrEmpty()) return;
-            Custom = Original;
+            Custom = Original.Split(separator: '/').Last();
         }
 
         #endregion
