@@ -22,7 +22,7 @@ namespace CGTK.Tools.CustomizableMenus
         public static MenuLayoutProject   CustomProjectMenuLayout   { get; internal set; }
     }
     
-    public sealed class ScriptTemplatesSettingsProvider : SettingsProvider
+    public sealed class MenuLayoutsSettingsProvider : SettingsProvider
     {
         private static readonly GUIStyle ButtonStyle = new GUIStyle(GUI.skin.button)
         {
@@ -32,7 +32,7 @@ namespace CGTK.Tools.CustomizableMenus
         };
 
         [PublicAPI]
-        public ScriptTemplatesSettingsProvider(in String path, in SettingsScope scopes, in IEnumerable<String> keywords = null) : base(path, scopes, keywords)
+        public MenuLayoutsSettingsProvider(in String path, in SettingsScope scopes, in IEnumerable<String> keywords = null) : base(path, scopes, keywords)
         { }
 
         public override void OnGUI(String searchContext)
@@ -109,7 +109,7 @@ namespace CGTK.Tools.CustomizableMenus
 
         [SettingsProvider]
         public static SettingsProvider Create() 
-            => new ScriptTemplatesSettingsProvider(path: PackageConstants.PREFERENCE_PATH, scopes: SettingsScope.User);
+            => new MenuLayoutsSettingsProvider(path: PackageConstants.PREFERENCE_PATH, scopes: SettingsScope.User);
     }
 }
 //#endif
