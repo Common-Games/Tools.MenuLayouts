@@ -22,8 +22,6 @@ namespace CGTK.Tools.CustomizableMenus
 			if (Preferences.CustomHierarchyMenuLayout == null) return;
 
 			CreateGenericMenu(layout: Preferences.CustomHierarchyMenuLayout, menu: out _hierarchyMenu);
-			
-			Debug.Log(message: $"Hierarchy Menu = {_hierarchyMenu}, ItemCount = {_hierarchyMenu.GetItemCount()}");
 		}
 
 		private static void OnHierarchyGUI(I32 instanceID, Rect selectionRect)

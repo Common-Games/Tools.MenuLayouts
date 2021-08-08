@@ -1,8 +1,6 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 
-using UnityEditor;
 using UnityEngine;
 
 using JetBrains.Annotations;
@@ -12,23 +10,31 @@ using Sirenix.OdinInspector;
 using Sirenix.Utilities.Editor;
 #endif
 
-using Object = System.Object;
-
 namespace CGTK.Tools.CustomizableMenus
 {
     using I32 = Int32;
 
-    public abstract class MenuLayout<T_Item> : ScriptableObject
-        where T_Item : MenuItem 
+    public abstract class MenuLayout<T_Item> : ScriptableObject where T_Item : MenuItem 
     {
         #region Fields
         
 		#if ODIN_INSPECTOR
-        [ListDrawerSettings(ShowItemCount = false, OnTitleBarGUI = nameof(DrawAddFolderButton))]
+        [field: ListDrawerSettings(ShowItemCount = false, OnTitleBarGUI = nameof(DrawAddFolderButton))]
 		#endif
-        [SerializeField] private List<Element> tree = new List<Element>();
-        
-        [Serializable]
+		[field: SerializeField]
+        public List<Element> Tree { get; [UsedImplicitly] private set; } = new List<Element>();
+
+		#if ODIN_INSPECTOR
+		private void DrawAddFolderButton()
+		{
+			if (SirenixEditorGUI.ToolbarButton(EditorIcons.Folder))
+			{
+				Tree.Add(item: new Element(isGroup: true));
+			}
+		}
+		#endif
+		
+		[Serializable]
         public class Element
         {
         	#region Fields
@@ -63,6 +69,11 @@ namespace CGTK.Tools.CustomizableMenus
         	#endif
         	[field: SerializeField]
         	public T_Item Item { get; private set; } = null;
+
+			public MenuItem.ElementType ElementType => Item.Type; 
+			
+			public String OriginalPath => Item.Original;
+			public String CustomPath   => Item.Custom;
         	
         	#endregion
 
@@ -97,17 +108,21 @@ namespace CGTK.Tools.CustomizableMenus
 
         	#endregion
         }
-		
-		#if ODIN_INSPECTOR
-		private void DrawAddFolderButton()
-		{
-			if (SirenixEditorGUI.ToolbarButton(EditorIcons.Folder))
-			{
-				tree.Add(item: new Element(isGroup: true));
-			}
-		}
-		#endif
 
         #endregion
+		
+		#region Indexer
+        
+		[PublicAPI]
+		public Element this[I32 index]
+		{
+			get => ((index >= 0) && (index <= Tree.Count)) ? Tree[index] : null;
+			set => Tree[index] = value;
+		}
+
+		[PublicAPI] 
+		public I32 Length => Tree.Count;
+
+		#endregion
 	}
 }
