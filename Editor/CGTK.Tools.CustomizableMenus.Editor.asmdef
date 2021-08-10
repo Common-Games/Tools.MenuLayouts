@@ -3,7 +3,8 @@
     "rootNamespace": "CGTK.Tools.CustomizableMenus",
     "references": [
         "CGTK.Utilities.Extensions.Runtime",
-        "CGTK.Utilities.Shared.Editor"
+        "CGTK.Utilities.Shared.Editor",
+        "Unity.Settings.Editor"
     ],
     "includePlatforms": [
         "Editor"
