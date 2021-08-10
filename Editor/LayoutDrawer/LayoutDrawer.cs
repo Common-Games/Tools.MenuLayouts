@@ -13,8 +13,6 @@ namespace CGTK.Tools.CustomizableMenus
 	{
 		static LayoutDrawer()
 		{
-			Debug.Log(message: "Started Layout Drawer!");
-			
 			EditorApplication.projectWindowItemOnGUI   += OnProjectGUI;
 			EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyGUI;
 		}

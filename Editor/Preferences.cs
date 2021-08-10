@@ -1,121 +1,168 @@
-//#if UNITY_EDITOR
-using System;
-using System.Collections.Generic;
+﻿using System;
+using System.Runtime.CompilerServices;
 
 using UnityEditor;
+using UnityEditor.SettingsManagement;
 using UnityEngine;
-
-using JetBrains.Annotations;
 
 #if ODIN_INSPECTOR
 using Sirenix.Utilities.Editor;
 #endif
 
 using CGTK.Utilities.Shared;
+using JetBrains.Annotations;
 
 namespace CGTK.Tools.CustomizableMenus
 {
-    [Serializable]
-    internal static class Preferences
+    /// <summary>
+    /// This class will act as a manager for the <see cref="Settings"/> singleton.
+    /// </summary>
+    internal static class SettingsManager
     {
-        [field: SerializeField]
-        public static MenuLayoutHierarchy CustomHierarchyMenuLayout { get; internal set; }
-        [field: SerializeField]
-        public static MenuLayoutProject   CustomProjectMenuLayout   { get; internal set; }
+        private static Settings _internalInstance;
+        internal static Settings Instance => _internalInstance ??= new Settings(PackageConstants.PACKAGE_NAME);
+        public static void Save() => Instance.Save();
+
+        [SettingsProvider]
+        private static SettingsProvider Create() //TODO: TryGet?
+        {
+            UserSettingsProvider __provider = new UserSettingsProvider(path: "Preferences/CGTK/Tools/Custom Menu Layouts",
+                settings: Instance,
+                assemblies: new [] { typeof(SettingsManager).Assembly });
+            
+            return __provider;
+        }
     }
     
-    public sealed class MenuLayoutsSettingsProvider : SettingsProvider
+    internal sealed class Setting<T> : UserSetting<T>
     {
-        private static readonly GUIStyle ButtonStyle = new GUIStyle(GUI.skin.button)
+        public Setting(T value, [CallerMemberName] String key = "", in SettingsScope scope = SettingsScope.User)
+            : base(settings: SettingsManager.Instance, key: key, value: value, scope: scope)
         {
-            fixedHeight = 18,
-            fixedWidth  = 18,
-            padding = new RectOffset(left: 0, right: 0, top: 0, bottom: 0)
-        };
+        }
+    }
+    
+    [PublicAPI]
+    internal class Preferences : EditorWindow
+    {
+        #region Fields
+        
+        [UserSetting] 
+        private static readonly Setting<MenuLayoutHierarchy> HierarchyMenuLayout = new Setting<MenuLayoutHierarchy>(value: null);
+        [UserSetting] 
+        private static readonly Setting<MenuLayoutProject>   ProjectMenuLayout   = new Setting<MenuLayoutProject>(value: null);
 
-        [PublicAPI]
-        public MenuLayoutsSettingsProvider(in String path, in SettingsScope scopes, in IEnumerable<String> keywords = null) : base(path, scopes, keywords)
-        { }
-
-        public override void OnGUI(String searchContext)
+        public static MenuLayoutHierarchy CustomHierarchyMenuLayout
         {
-            __DrawHierarchyMenuLayoutSelector();
-            __DrawProjectMenuLayoutSelector();
+            get => HierarchyMenuLayout.value;
+            
+            private 
+            set => HierarchyMenuLayout.value = value;
+        } 
+        public static MenuLayoutProject CustomProjectMenuLayout
+        {
+            get => ProjectMenuLayout.value;
 
-            static void __DrawHierarchyMenuLayoutSelector()
-            {
-                EditorGUILayout.BeginHorizontal();
-                {
-                    #if ODIN_INSPECTOR
-                    GUILayout.Label(text: "HierarchyMenu Layout", options: GUILayout.Width(145));
+            private
+            set => ProjectMenuLayout.value = value;
+        }
 
-                    Preferences.CustomHierarchyMenuLayout = SirenixEditorFields.UnityObjectField(
-                        value: Preferences.CustomHierarchyMenuLayout,
-                        objectType: typeof(MenuLayoutHierarchy), 
-                        allowSceneObjects: false) as MenuLayoutHierarchy;
-                    #else
-                    Preferences.CustomHierarchyMenuLayout = EditorGUILayout.ObjectField(
-                        label: "HierarchyMenu Layout", 
-                        obj: Preferences.CustomHierarchyMenuLayout, 
-                        objType: typeof(MenuLayoutHierarchy), 
-                        allowSceneObjects: false) as MenuLayoutHierarchy;
-                    #endif
+        #endregion
 
-                    if (GUILayout.Button(content: EditorGUIUtility.IconContent(name: "d_Toolbar Plus", text: "Create"), ButtonStyle))
-                    {
-                        Preferences.CustomHierarchyMenuLayout = ScriptableObjectCreator.Create<MenuLayoutHierarchy>(directory: "Assets");
-                    }   
-                    
-                    if (GUILayout.Button(content: EditorGUIUtility.IconContent(name: "d_Refresh", text: "Reset"), ButtonStyle))
-                    {
-                        Preferences.CustomHierarchyMenuLayout = null;
-                    }  
-                }
-                EditorGUILayout.EndHorizontal();
-
-                LayoutDrawer.UpdateHierarchyMenuLayout();
+        [UserSettingBlock(category: "Menu Layouts")]
+        private static void OnSearchGUI(String searchContext)
+        {
+            EditorGUI.BeginChangeCheck();
+            { 
+                DrawHierarchyMenuLayoutSelector(searchContext);
+                DrawProjectMenuLayoutSelector(searchContext);
             }
-
-            static void __DrawProjectMenuLayoutSelector()
+            if (EditorGUI.EndChangeCheck())
             {
-                EditorGUILayout.BeginHorizontal();
-                {
-                    #if ODIN_INSPECTOR
-                    GUILayout.Label(text: "ProjectMenu Layout", options: GUILayout.Width(145));
-                    
-                    Preferences.CustomProjectMenuLayout = SirenixEditorFields.UnityObjectField(
-                        value: Preferences.CustomProjectMenuLayout,
-                        objectType: typeof(MenuLayoutProject), 
-                        allowSceneObjects: false) as MenuLayoutProject;
-                    #else
-                    Preferences.CustomProjectMenuLayout = EditorGUILayout.ObjectField(
-                        label: "ProjectMenu Layout", 
-                        obj: Preferences.CustomProjectMenuLayout, 
-                        objType: typeof(MenuLayoutProject), 
-                        allowSceneObjects: false) as MenuLayoutProject;
-                    #endif
-                    
-                    if (GUILayout.Button(content: EditorGUIUtility.IconContent(name: "d_Toolbar Plus", text: "Create"), ButtonStyle))
-                    {
-                        Preferences.CustomProjectMenuLayout = ScriptableObjectCreator.Create<MenuLayoutProject>(directory: "Assets");
-                    }   
-                    
-                    if (GUILayout.Button(content: EditorGUIUtility.IconContent(name: "d_Refresh", text: "Reset"), ButtonStyle))
-                    {
-                        Preferences.CustomProjectMenuLayout = null;
-                    }  
-                }
-                EditorGUILayout.EndHorizontal();
-
-                LayoutDrawer.UpdateProjectMenuLayout();
+                SettingsManager.Save();
             }
         }
 
-        public static SettingsProvider Settings { get; private set; }
+        private static void DrawHierarchyMenuLayoutSelector(in String searchContext)
+        {
+            GUIStyle __buttonStyle = new GUIStyle(GUI.skin.button)
+            {
+                fixedHeight = 18,
+                fixedWidth  = 18,
+                padding     = new RectOffset(left: 0, right: 0, top: 0, bottom: 0)
+            }; //Somehow get Errors when using a static version of this.... So unfortunately we have to do this. I could send them as a parameter, but don't want to.
+            
+            EditorGUILayout.BeginHorizontal();
+            {
+                #if ODIN_INSPECTOR
+                GUILayout.Label(text: "HierarchyMenu Layout", options: GUILayout.Width(145));
+
+                CustomHierarchyMenuLayout = SirenixEditorFields.UnityObjectField(
+                    value: CustomHierarchyMenuLayout,
+                    objectType: typeof(MenuLayoutHierarchy), 
+                    allowSceneObjects: false) as MenuLayoutHierarchy;
+                #else
+                CustomHierarchyMenuLayout = EditorGUILayout.ObjectField(
+                    label: "HierarchyMenu Layout", 
+                    obj: CustomHierarchyMenuLayout, 
+                    objType: typeof(MenuLayoutHierarchy), 
+                    allowSceneObjects: false) as MenuLayoutHierarchy;
+                #endif
+                
+                if (GUILayout.Button(content: EditorGUIUtility.IconContent(name: "d_Toolbar Plus", text: "Create"), __buttonStyle))
+                {
+                    CustomHierarchyMenuLayout = ScriptableObjectCreator.Create<MenuLayoutHierarchy>(directory: "Assets");
+                }   
+                    
+                if (GUILayout.Button(content: EditorGUIUtility.IconContent(name: "d_Refresh", text: "Reset"), __buttonStyle))
+                {
+                    CustomHierarchyMenuLayout = null;
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+
+            LayoutDrawer.UpdateHierarchyMenuLayout();
+        }
         
-        [SettingsProvider]
-        public static SettingsProvider Create() 
-            => Settings = new MenuLayoutsSettingsProvider(path: PackageConstants.PREFERENCE_PATH, scopes: SettingsScope.User);
+        private static void DrawProjectMenuLayoutSelector(in String searchContext)
+        {
+            GUIStyle __buttonStyle = new GUIStyle(GUI.skin.button)
+            {
+                fixedHeight = 18,
+                fixedWidth  = 18,
+                padding     = new RectOffset(left: 0, right: 0, top: 0, bottom: 0)
+            }; //Somehow get Errors when using a static version of this.... So unfortunately we have to do this. I could send them as a parameter, but don't want to.
+            
+            EditorGUILayout.BeginHorizontal();
+            {
+                #if ODIN_INSPECTOR
+                GUILayout.Label(text: "ProjectMenu Layout", options: GUILayout.Width(145));
+                    
+                CustomProjectMenuLayout = SirenixEditorFields.UnityObjectField(
+                    value: CustomProjectMenuLayout,
+                    objectType: typeof(MenuLayoutProject), 
+                    allowSceneObjects: false) as MenuLayoutProject;
+                #else
+                CustomProjectMenuLayout = EditorGUILayout.ObjectField(
+                    label: "ProjectMenu Layout", 
+                    obj: CustomProjectMenuLayout, 
+                    objType: typeof(MenuLayoutProject), 
+                    allowSceneObjects: false) as MenuLayoutProject;
+                #endif
+                
+                if (GUILayout.Button(content: EditorGUIUtility.IconContent(name: "d_Toolbar Plus", text: "Create"), __buttonStyle))
+                {
+                    CustomProjectMenuLayout = ScriptableObjectCreator.Create<MenuLayoutProject>(directory: "Assets");
+                }   
+                    
+                if (GUILayout.Button(content: EditorGUIUtility.IconContent(name: "d_Refresh", text: "Reset"), __buttonStyle))
+                {
+                    CustomProjectMenuLayout = null;
+                }
+            }
+            EditorGUILayout.EndHorizontal();
+
+            LayoutDrawer.UpdateProjectMenuLayout();
+        }
     }
 }
-//#endif
