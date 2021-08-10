@@ -1,0 +1,20 @@
+{
+    "name": "CGTK.Tools.CustomizableMenus.Editor",
+    "rootNamespace": "CGTK.Tools.CustomizableMenus",
+    "references": [
+        "CGTK.Utilities.Extensions.Runtime",
+        "CGTK.Utilities.Shared.Editor",
+        "Unity.Settings.Editor"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
