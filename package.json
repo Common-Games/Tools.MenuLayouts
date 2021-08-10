@@ -1,7 +1,7 @@
 {
   "name": "com.common-games.tools.custom-menu-layouts",
   "displayName": "CGTK.Tools.CustomMenuLayouts",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "unity": "2020.3",
   "description": "Customize the layouts of Unity's menus.\nIt's mainly meant to declutter the editor.\n\nYou can configure them per project and user, so the artists or designers can use different layouts than the programmers.",
   "keywords": [
