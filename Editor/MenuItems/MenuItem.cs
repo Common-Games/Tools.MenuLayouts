@@ -8,7 +8,7 @@ using UnityEngine;
 using Sirenix.OdinInspector;
 #endif
 
-using CGTK.Utilities.Extensions;
+using CGTK.Utils.Extensions;
 
 namespace CGTK.Tools.CustomizableMenus
 {

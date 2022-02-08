@@ -1,10 +1,10 @@
 {
-    "name": "CGTK.Tools.CustomizableMenus.Editor",
-    "rootNamespace": "CGTK.Tools.CustomizableMenus",
+    "name": "CGTK.Tools.CustomMenuLayouts",
+    "rootNamespace": "CGTK.Tools.CustomMenuLayouts",
     "references": [
-        "CGTK.Utilities.Extensions.Runtime",
-        "CGTK.Utilities.Shared.Editor",
-        "Unity.Settings.Editor"
+        "Unity.Settings.Editor",
+        "CGTK.Utils.Extensions",
+        "CGTK.Utils.Shared"
     ],
     "includePlatforms": [
         "Editor"
