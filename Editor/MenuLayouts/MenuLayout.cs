@@ -7,39 +7,48 @@ using JetBrains.Annotations;
 
 #if ODIN_INSPECTOR
 using Sirenix.OdinInspector;
+using Sirenix.Serialization;
 using Sirenix.Utilities.Editor;
+#endif
+
+#if ODIN_INSPECTOR
+using ScriptableObject = Sirenix.OdinInspector.SerializedScriptableObject;
+#else
+using ScriptableObject = UnityEngine.ScriptableObject;
 #endif
 
 namespace CGTK.Tools.CustomizableMenus
 {
     using I32 = Int32;
 
-    public abstract class MenuLayout<T_Item> : ScriptableObject where T_Item : MenuItem 
+    [PublicAPI]
+    internal abstract class MenuLayout<T_Item> : ScriptableObject //, ISerializationCallbackReceiver 
+		where T_Item : MenuItem 
     {
         #region Fields
         
 		#if ODIN_INSPECTOR
-        [field: ListDrawerSettings(ShowItemCount = false, OnTitleBarGUI = nameof(DrawAddFolderButton))]
+		[field: ListDrawerSettings(ShowItemCount = false, OnTitleBarGUI = nameof(DrawAddFolderButton))]
+		[field: OdinSerialize]
 		#endif
-		[field: SerializeField]
-        public List<Element> Tree { get; [UsedImplicitly] private set; } = new List<Element>();
+		public List<Element> Tree = new List<Element>(); //{ get; private set; } = new List<Element>();
 
 		#if ODIN_INSPECTOR
 		private void DrawAddFolderButton()
 		{
-			if (SirenixEditorGUI.ToolbarButton(EditorIcons.Folder))
+			if (SirenixEditorGUI.ToolbarButton(icon: EditorIcons.Folder))
 			{
 				Tree.Add(item: new Element(isGroup: true));
 			}
 		}
 		#endif
 		
-		[Serializable]
+		//[Serializable]
         public class Element
         {
         	#region Fields
 
-        	public Boolean IsGroup { get; set; } = false;
+        	public Boolean IsGroup { get; set; }
 
         	private Boolean _showName = true;
 
@@ -54,21 +63,19 @@ namespace CGTK.Tools.CustomizableMenus
         	public String GroupName { get; private set; }
 
         	#if ODIN_INSPECTOR
-        	[field: ShowIf(condition: nameof(IsGroup)), BoxGroup]
-        	[field: CustomContextMenu(menuItem: "Show GroupName", action: nameof(ShowName))]
-        	[field: CustomContextMenu(menuItem: "Hide GroupName", action: nameof(HideName))]
-        	[field: ListDrawerSettings(ShowItemCount = false, OnTitleBarGUI = nameof(DrawAddFolderButtonElement))]
-        	[field: LabelText(text: "$" + nameof(GroupName))]
-        	#endif
-        	[field: SerializeField]
-        	public List<Element> Group { get; private set; } = null;
+            [field: ShowIf(condition: nameof(IsGroup)), BoxGroup]
+            [field: CustomContextMenu(menuItem: "Show GroupName", action: nameof(ShowName))]
+            [field: CustomContextMenu(menuItem: "Hide GroupName", action: nameof(HideName))]
+            [field: ListDrawerSettings(ShowItemCount = false, OnTitleBarGUI = nameof(DrawAddFolderButtonElement))]
+            [field: LabelText(text: "$" + nameof(GroupName))]
+            #endif
+            public List<Element> Group = null; //{ get; private set; } = null;
         	
         	#if ODIN_INSPECTOR
         	[field: HideLabel]
         	[field: HideIf(condition: nameof(IsGroup))]
-        	#endif
-        	[field: SerializeField]
-        	public T_Item Item { get; private set; } = null;
+            #endif
+            public T_Item Item = default;
 
 			public MenuItem.ElementType ElementType => Item.Type; 
 			
@@ -79,7 +86,10 @@ namespace CGTK.Tools.CustomizableMenus
 
         	#region Structors
 
-        	public Element(Boolean isGroup)
+            public Element() : this(isGroup: false)
+            { }
+            
+        	public Element(Boolean isGroup = false)
         	{
         		this.IsGroup = isGroup;
 
@@ -87,6 +97,8 @@ namespace CGTK.Tools.CustomizableMenus
         		{
         			Group = new List<Element>(capacity: 10);
         		}
+                
+                
         	}
 
         	#endregion

@@ -9,8 +9,9 @@ using UnityEngine;
 using Sirenix.Utilities.Editor;
 #endif
 
-using CGTK.Utilities.Shared;
 using JetBrains.Annotations;
+
+using CGTK.Utils.Shared;
 
 namespace CGTK.Tools.CustomizableMenus
 {

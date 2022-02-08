@@ -1,4 +1,7 @@
+#if UNITY_EDITOR
 using System;
+using static System.IO.Path;
+
 using UnityEditor;
 using UnityEngine;
 
@@ -29,6 +32,9 @@ namespace CGTK.Tools.CustomizableMenus
 			for (I32 __index = 0; __index < layout.Length; __index++) //TODO: Make MenuLayout IEnumerable
 			{
 				MenuLayout<T>.Element __element = layout[__index];
+				
+				if(__element == null) continue;
+				if(__element.Equals(null)) continue;
 
 				if (__element.IsGroup)
 				{
@@ -55,9 +61,12 @@ namespace CGTK.Tools.CustomizableMenus
 			{
 				foreach (MenuLayout<T>.Element __element in element.Group)
 				{
+					if(__element == null) continue;
+					if(__element.Equals(null)) continue;
+
 					if (__element.IsGroup)
 					{
-						__Create(menu, __element, group +  "/" + __element.GroupName);
+						__Create(menu: menu, element: __element, @group: group + "/" + __element.GroupName);
 					}
 					else
 					{
@@ -79,3 +88,4 @@ namespace CGTK.Tools.CustomizableMenus
 		}
 	}
 }
+#endif
