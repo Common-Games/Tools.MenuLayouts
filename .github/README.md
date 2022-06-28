@@ -1,10 +1,10 @@
 <!-- toc -->
 <div style="text-align: center;">
 
-# CGTK.Tools.CustomMenuLayouts
+# CGTK.Tools.MenuLayouts
 
-![Version]( https://img.shields.io/github/package-json/v/Common-Games/Tools.CustomMenuLayouts?style=for-the-badge)
-![Users](   https://img.shields.io/github/stars/Common-Games/Tools.CustomMenuLayouts?color=orange&style=for-the-badge)
+![Version]( https://img.shields.io/github/package-json/v/Common-Games/Tools.MenuLayouts?style=for-the-badge)
+![Users](   https://img.shields.io/github/stars/Common-Games/Tools.MenuLayouts?color=orange&style=for-the-badge)
 [![Discord](https://img.shields.io/discord/763171539763462144?color=%237289DA&label=discord&logo=discord&style=for-the-badge)](https://discord.gg/S9wHQ96)
 
 When using any of our packages, please make sure to <b>Star</b> 🌟 the what you're using!
@@ -28,15 +28,15 @@ You can configure them per project and user, so the artists and designers can us
 
 Part of the **CGTK** Framework. (**C**ommon **G**ames **T**ool **K**it)
 
-• [📚 Releases](https://github.com/Common-Games/Tools.CustomMenuLayouts/releases)
-• [💬 Issues](  https://github.com/Common-Games/Tools.CustomMenuLayouts/issues)
-• [📝 License]( https://github.com/Common-Games/Tools.CustomMenuLayouts/blob/stable/LICENSE)
+• [📚 Releases](https://github.com/Common-Games/Tools.MenuLayouts/releases)
+• [💬 Issues](  https://github.com/Common-Games/Tools.MenuLayouts/issues)
+• [📝 License]( https://github.com/Common-Games/Tools.MenuLayouts/blob/stable/LICENSE)
 ------
 # Installation
 
 **Dependencies:**
-* [CGTK.Tools.CustomMenuLayouts](https://github.com/Common-Games/Utils.Extensions)
-* [CGTK.Utils.Shared](           https://github.com/Common-Games/Utils.Shared)
+* [CGTK.Tools.Extensions](https://github.com/Common-Games/Utils.Extensions)
+* [CGTK.Utils.Shared](    https://github.com/Common-Games/Utils.Shared)
 
 Install dependencies _first!!_
 
@@ -48,7 +48,7 @@ Install dependencies _first!!_
 2. Open `Window/Package Manager`
 3. Click <kbd>+</kbd>
 4. <kbd>Add from Git URL</kbd>
-5. `https://github.com/Common-Games/Tools.CustomMenuLayouts.git` <kbd>Add</kbd>
+5. `https://github.com/Common-Games/Tools.MenuLayouts.git` <kbd>Add</kbd>
 
 <b>Note that Unity doesn't give you the ability to receive updates through the Package Manager this way, you will have to update manually!!</b>
 </details>
